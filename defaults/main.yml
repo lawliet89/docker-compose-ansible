@@ -1,0 +1,6 @@
+---
+code_source: 'local'
+get_local_commit: True
+git_repo_version: 'master'
+docker_compose_files:
+  - docker-compose.yml

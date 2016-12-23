@@ -53,12 +53,17 @@
   file:
     path: "{{ project_directory }}"
     state: directory
+- name: "List files in {{ project_directory }}"
+  find:
+    paths: "{{ project_directory }}"
+    patterns: "**/*"
+    recurse: yes
+  register: project_directory_files
 - name: "Clear {{ project_directory }}"
   file:
     path: "{{ item }}"
     state: absent
-  with_fileglob:
-    - "{{ project_directory }}/**/*"
+  with_items: "{{ project_directory_files.files }}"
   when: code_source == 'local'
 - name: "Untar to {{ project_directory }}"
   unarchive:
@@ -90,6 +95,7 @@
 - name: "Stop, build and Start Docker Compose {{ project_directory }}: {{ '; '.join(docker_compose_files) }}"
   docker_service:
     project_src: "{{ project_directory }}"
+    project_name: "{{ project_name | default(omit) }}"
     build: yes
     files: "{{docker_compose_files}}"
     state: "{{ item }}"

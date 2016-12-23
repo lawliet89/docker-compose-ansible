@@ -40,3 +40,7 @@ License
 -------
 
 LGPL
+
+TODO
+-------
+Write tests

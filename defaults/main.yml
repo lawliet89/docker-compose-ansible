@@ -4,3 +4,4 @@ get_local_commit: True
 git_repo_version: 'master'
 docker_compose_files:
   - docker-compose.yml
+remove_volumes: no

@@ -71,9 +71,9 @@
     state: absent
   with_items: "{{ project_directory_files }}"
   when: code_source == 'local'
-- name: "List directories in {{ playbook_dir }}"
+- name: "List directories in {{ project_directory }}"
   find:
-    paths: "{{ playbook_dir }}"
+    paths: "{{ project_directory }}"
     patterns: "*"
     recurse: yes
     file_type: directory

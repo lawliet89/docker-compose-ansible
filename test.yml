@@ -1,0 +1,30 @@
+---
+ - name: Test
+   hosts: all
+   tasks:
+    - name: "List files in {{ playbook_dir }}"
+      find:
+       paths: "{{ playbook_dir }}"
+       patterns: "*"
+       recurse: yes
+       file_type: file
+      register: find_result
+    - name: Map files
+      set_fact:
+        project_directory_files: "{{ find_result.files | map(attribute='path') | list }}"
+    - name: Test
+      debug:
+       var: project_directory_files
+    - name: "List directories in {{ playbook_dir }}"
+      find:
+       paths: "{{ playbook_dir }}"
+       patterns: "*"
+       recurse: yes
+       file_type: directory
+      register: find_result
+    - name: Map directories
+      set_fact:
+        project_directory_directories: "{{ find_result.files | map(attribute='path') | list }}"
+    - name: Test
+      debug:
+       var: project_directory_directories

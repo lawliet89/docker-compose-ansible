@@ -10,6 +10,7 @@ The target host should have `docker`, `docker-compose` and the python library `d
 
 Role Variables
 --------------
+
  - `code_source`: 'local' or `git`. Set to `local` to get source code from the host machine, or `git` from a git
  repository.
  - `git_repo`: URL for a git repository.
@@ -19,6 +20,8 @@ Role Variables
  - `docker_compose_files`: An array of `docker-compose` files to use to deploy
  - `local_path`: if `code_source` is `local` or if `get_local_commit` is true, the path to the local source code.
  - `project_directory`: The path on the target host to deploy source code to.
+ - `remove_volumes`: Set to `yes` to remove existing volumes while deploying. Defaults to `no`.
+ - `pull_images`: Set to `True` to pull images from a registry before creating the containers. Defaults to `True`.
 
 
 Example Playbook
@@ -43,4 +46,5 @@ LGPL
 
 TODO
 -------
+
 Write tests

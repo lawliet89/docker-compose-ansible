@@ -110,6 +110,7 @@
     chdir: "{{ project_directory }}"
   args:
     warn: False
+  when: pull_images
 - name: "Docker-compose Build"
   shell:
     cmd: "docker-compose {{ docker_compose_switch }} build --pull"

@@ -23,6 +23,9 @@ Role Variables
  - `remove_volumes`: Set to `yes` to remove existing volumes while deploying. Defaults to `no`.
  - `pull_images`: Set to `True` to pull images from a registry before creating the containers. Defaults to `True`.
  - `build_images`: Set to `True` to build images for containers. Defaults to `True`.
+ - `docker_become`: This is a dictionary with the following keys: `become`, `become_user`, `become_method`, and
+ `become_flags`, with their usual [meaning](https://docs.ansible.com/ansible/become.html) in Ansible. Use this
+ to set if `become` is needed for Docker commands.
 
 
 Example Playbook

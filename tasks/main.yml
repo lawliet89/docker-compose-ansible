@@ -121,6 +121,10 @@
     chdir: "{{ project_directory }}"
   args:
     warn: False
+  become: "{{ docker_become.become | default(omit) }}"
+  become_user: "{{ docker_become.become_user | default(omit) }}"
+  become_method: "{{ docker_become.become_method | default(omit) }}"
+  become_flags: "{{ docker_become.become_flags | default(omit) }}"
   when: build_images
 - name: "Stop, build and Start Docker Compose {{ project_directory }}: {{ '; '.join(docker_compose_files) }}"
   docker_service:
@@ -130,6 +134,10 @@
     files: "{{ docker_compose_files }}"
     remove_volumes: "{{ remove_volumes | default(no) }}"
     state: "{{ item }}"
+  become: "{{ docker_become.become | default(omit) }}"
+  become_user: "{{ docker_become.become_user | default(omit) }}"
+  become_method: "{{ docker_become.become_method | default(omit) }}"
+  become_flags: "{{ docker_become.become_flags | default(omit) }}"
   with_items:
     - absent
     - present

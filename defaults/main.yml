@@ -7,8 +7,4 @@ docker_compose_files:
 remove_volumes: no
 pull_images: True
 build_images: True
-docker_become: {}
-  become: false
-  # become_user: ""
-  # become_method: ""
-  # become_flags: ""
+docker_become: false

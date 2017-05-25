@@ -22,6 +22,7 @@ Role Variables
  - `project_directory`: The path on the target host to deploy source code to.
  - `remove_volumes`: Set to `yes` to remove existing volumes while deploying. Defaults to `no`.
  - `pull_images`: Set to `True` to pull images from a registry before creating the containers. Defaults to `True`.
+ - `build_images`: Set to `True` to build images for containers. Defaults to `True`.
 
 
 Example Playbook

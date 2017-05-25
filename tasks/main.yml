@@ -117,12 +117,13 @@
     chdir: "{{ project_directory }}"
   args:
     warn: False
+  when: build_images
 - name: "Stop, build and Start Docker Compose {{ project_directory }}: {{ '; '.join(docker_compose_files) }}"
   docker_service:
     project_src: "{{ project_directory }}"
     project_name: "{{ project_name | default(omit) }}"
-    build: yes
-    files: "{{docker_compose_files}}"
+    build: "{{ build_images }}"
+    files: "{{ docker_compose_files }}"
     remove_volumes: "{{ remove_volumes | default(no) }}"
     state: "{{ item }}"
   with_items:

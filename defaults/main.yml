@@ -6,3 +6,4 @@ docker_compose_files:
   - docker-compose.yml
 remove_volumes: no
 pull_images: True
+build_images: True

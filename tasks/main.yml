@@ -132,3 +132,4 @@
   with_items:
     - absent
     - present
+  when: start_containers | default(true)

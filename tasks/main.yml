@@ -25,6 +25,7 @@
     dest: "{{ project_directory }}"
     force: yes
     version: "{{ git_repo_version }}"
+    track_submodules: "{{ git_track_submodules | default(omit) }}"
   when: code_source == 'git'
 # There are several bugs related to the `copy` and `synchronize` modules
 # Firstly, `copy` does not preserve file permissions, and executeable scripts like `docker-entrypoint.sh`

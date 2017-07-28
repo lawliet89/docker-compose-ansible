@@ -44,7 +44,7 @@ Example Playbook
 License
 -------
 
-LGPL
+Apache 2.0
 
 TODO
 -------

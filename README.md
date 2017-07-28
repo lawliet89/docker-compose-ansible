@@ -6,6 +6,10 @@ Ansible role to deploy applications via `docker-compose`.
 Requirements
 ------------
 
+The deploying host which is running the playbook should have at least Ansible 2.3 so that
+the [bug](https://github.com/ansible/ansible/pull/17780) with `copy` module
+not preserving permissions is fixed.
+
 The target host should have `docker`, `docker-compose` and the python library `docker-py` installed.
 
 Role Variables

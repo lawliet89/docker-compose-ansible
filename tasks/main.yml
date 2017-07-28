@@ -27,29 +27,6 @@
     version: "{{ git_repo_version }}"
     track_submodules: "{{ git_track_submodules | default(omit) }}"
   when: code_source == 'git'
-# There are several bugs related to the `copy` and `synchronize` modules
-# Firstly, `copy` does not preserve file permissions, and executeable scripts like `docker-entrypoint.sh`
-# will fail to execute with docker, leading to failure
-# See https://github.com/ansible/ansible/issues/14686 and https://github.com/ansible/ansible-modules-core/issues/1124
-# Secondly, there is a bug with vagrant and the synchronize modules
-# See https://github.com/ansible/ansible/pull/15993
-# - name: "Copy files from local {{ local_path }}"
-#   copy:
-#     dest: "{{ project_directory }}"
-#     follow: yes
-#     src: "{{ local_path }}/"
-#   when: code_source == 'local'
-- name: Get temporary file
-  local_action: shell mktemp
-  register: temp_file
-  when: code_source == 'local'
-- name: "Gzip to {{ temp_file.stdout }}"
-  shell: "tar -pczf {{ temp_file.stdout | quote }} *"
-  args:
-    chdir: "{{ local_path }}"
-    warn: False
-  delegate_to: localhost
-  when: code_source == 'local'
 - name: "Check existence of {{ project_directory }}"
   file:
     path: "{{ project_directory }}"
@@ -90,17 +67,11 @@
     state: absent
   with_items: "{{ project_directory_directories }}"
   when: code_source == 'local'
-- name: "Untar to {{ project_directory }}"
-  unarchive:
-    copy: yes
-    src: "{{ temp_file.stdout }}"
+- name: "Copy files from local {{ local_path }} to {{ project_directory }}"
+  copy:
     dest: "{{ project_directory }}"
-  when: code_source == 'local'
-- name: "Delete temporary archive {{ temp_file.stdout }}"
-  file:
-    path: "{{ temp_file.stdout }}"
-    state: absent
-  delegate_to: localhost
+    follow: yes
+    src: "{{ local_path }}/"
   when: code_source == 'local'
 - name: "Generate `-f` parameters"
   set_fact:

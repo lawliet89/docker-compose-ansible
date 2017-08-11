@@ -72,6 +72,7 @@
     state: absent
   with_items: "{{ project_directory_files }}"
   when: code_source == 'local'
+  become: {{ docker_become }}
 - name: "List top level directories in {{ project_directory }}"
   find:
     paths: "{{ project_directory }}"
@@ -90,6 +91,7 @@
     state: absent
   with_items: "{{ project_directory_directories }}"
   when: code_source == 'local'
+  become: {{ docker_become }}
 - name: "Untar to {{ project_directory }}"
   unarchive:
     copy: yes

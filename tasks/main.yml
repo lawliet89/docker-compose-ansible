@@ -117,7 +117,7 @@
   when: pull_images
 - name: "Docker-compose Build"
   shell:
-    cmd: "docker-compose {{ docker_compose_switch }} build --pull"
+    cmd: "docker-compose {{ docker_compose_switch }} build {{ pull_images | ternary('--pull', '') }}"
     chdir: "{{ project_directory }}"
   args:
     warn: False
@@ -127,7 +127,7 @@
   docker_service:
     project_src: "{{ project_directory }}"
     project_name: "{{ project_name | default(omit) }}"
-    build: "{{ build_images }}"
+    build: False
     files: "{{ docker_compose_files }}"
     remove_volumes: "{{ remove_volumes | default(no) }}"
     state: "{{ item }}"

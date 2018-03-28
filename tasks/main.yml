@@ -94,7 +94,7 @@
   become: "{{ docker_become }}"
 - name: "Untar to {{ project_directory }}"
   unarchive:
-    copy: yes
+    extra_opts: [-p]
     src: "{{ temp_file.stdout }}"
     dest: "{{ project_directory }}"
   when: code_source == 'local'

@@ -114,7 +114,7 @@
   args:
     warn: False
   become: "{{ docker_become }}"
-  when: pull_images
+  when: pull_images | bool
 - name: "Docker-compose Build"
   shell:
     cmd: "docker-compose {{ docker_compose_switch }} build {{ pull_images | ternary('--pull', '') }}"
@@ -122,9 +122,9 @@
   args:
     warn: False
   become: "{{ docker_become }}"
-  when: build_images
+  when: build_images | bool
 - name: "Stop, build and Start Docker Compose {{ project_directory }}: {{ '; '.join(docker_compose_files) }}"
-  docker_service:
+  docker_compose:
     project_src: "{{ project_directory }}"
     project_name: "{{ project_name | default(omit) }}"
     build: False

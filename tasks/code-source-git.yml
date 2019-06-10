@@ -1,0 +1,28 @@
+---
+
+- name: "Check if `get_local_commit` is true and `local_path` is defined"
+  fail:
+    msg: "You need to define `local_path` when `code_source` is 'git' and `get_local_commit` is true"
+  when: (get_local_commit | bool) and (local_path|default('') == '')
+
+- name: "Get local commit hash at {{ local_path }}"
+  local_action: shell git rev-parse HEAD chdir="{{ local_path }}"
+  when: get_local_commit | bool
+  register: local_commit_hash
+  args:
+    warn: False
+
+- name: "Setting git_repo_version to {{ local_commit_hash }}"
+  set_fact:
+    git_repo_version: "{{ local_commit_hash.stdout }}"
+  when: (local_commit_hash is succeeded) and (get_local_commit | bool)
+
+- name: "Checkout Git repository {{ git_repo }} -- {{ git_repo_version }}"
+  git:
+    accept_hostkey: yes
+    key_file: "{{ git_key_path | default(omit) }}"
+    repo: "{{ git_repo }}"
+    dest: "{{ project_directory }}"
+    force: yes
+    version: "{{ git_repo_version }}"
+    track_submodules: "{{ git_track_submodules | default(omit) }}"

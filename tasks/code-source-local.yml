@@ -1,0 +1,8 @@
+---
+
+- name: Push local path to host
+  synchronize:
+    src: "{{ local_path }}/"
+    dest: "{{ project_directory }}"
+    delete: yes
+    dirs: yes

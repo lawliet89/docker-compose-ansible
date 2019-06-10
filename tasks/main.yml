@@ -3,110 +3,22 @@
   fail:
     msg: "Code source must be `git` or `local` and not `{{ code_source }}`"
   when: "code_source != 'git' and code_source != 'local'"
-- name: "Check if `get_local_commit` is true and `local_path` is defined"
-  fail:
-    msg: "You need to define `local_path` when `code_source` is 'git' and `get_local_commit` is true"
-  when: code_source == 'git' and get_local_commit and (local_path|default('') == '')
-- name: "Get local commit hash at {{ local_path }}"
-  local_action: shell git rev-parse HEAD chdir="{{ local_path }}"
-  when: code_source == 'git' and get_local_commit
-  register: local_commit_hash
-  args:
-    warn: False
-- name: "Setting git_repo_version to {{ local_commit_hash }}"
-  set_fact:
-    git_repo_version: "{{ local_commit_hash.stdout }}"
-  when: local_commit_hash|succeeded and code_source == 'git' and get_local_commit
-- name: "Checkout Git repository {{ git_repo }} -- {{ git_repo_version }}"
-  git:
-    accept_hostkey: yes
-    key_file: "{{ git_key_path | default(omit) }}"
-    repo: "{{ git_repo }}"
-    dest: "{{ project_directory }}"
-    force: yes
-    version: "{{ git_repo_version }}"
-    track_submodules: "{{ git_track_submodules | default(omit) }}"
-  when: code_source == 'git'
-# There are several bugs related to the `copy` and `synchronize` modules
-# Firstly, `copy` does not preserve file permissions, and executeable scripts like `docker-entrypoint.sh`
-# will fail to execute with docker, leading to failure
-# See https://github.com/ansible/ansible/issues/14686 and https://github.com/ansible/ansible-modules-core/issues/1124
-# Secondly, there is a bug with vagrant and the synchronize modules
-# See https://github.com/ansible/ansible/pull/15993
-# - name: "Copy files from local {{ local_path }}"
-#   copy:
-#     dest: "{{ project_directory }}"
-#     follow: yes
-#     src: "{{ local_path }}/"
-#   when: code_source == 'local'
-- name: Get temporary file
-  local_action: shell mktemp
-  register: temp_file
-  when: code_source == 'local'
-- name: "Gzip to {{ temp_file.stdout }}"
-  shell: "tar -pczf {{ temp_file.stdout | quote }} *"
-  args:
-    chdir: "{{ local_path }}"
-    warn: False
-  delegate_to: localhost
-  when: code_source == 'local'
+
 - name: "Check existence of {{ project_directory }}"
   file:
     path: "{{ project_directory }}"
     state: directory
-- name: "List top level files in {{ project_directory }}"
-  find:
-    paths: "{{ project_directory }}"
-    patterns: "*"
-    recurse: no
-    file_type: file
-  register: find_result
+
+- include_tasks: code-source-git.yml
+  when: code_source == 'git'
+
+- include_tasks: code-source-local.yml
   when: code_source == 'local'
-- name: Map top level files
-  set_fact:
-    project_directory_files: "{{ find_result.files | map(attribute='path') | list }}"
-  when: code_source == 'local'
-- name: "Clear top level files in {{ project_directory }}"
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items: "{{ project_directory_files }}"
-  when: code_source == 'local'
-  become: "{{ docker_become }}"
-- name: "List top level directories in {{ project_directory }}"
-  find:
-    paths: "{{ project_directory }}"
-    patterns: "*"
-    recurse: no
-    file_type: directory
-  register: find_result
-  when: code_source == 'local'
-- name: Map top level directories
-  set_fact:
-    project_directory_directories: "{{ find_result.files | map(attribute='path') | list }}"
-  when: code_source == 'local'
-- name: "Clear top level directories in {{ project_directory }}"
-  file:
-    path: "{{ item }}"
-    state: absent
-  with_items: "{{ project_directory_directories }}"
-  when: code_source == 'local'
-  become: "{{ docker_become }}"
-- name: "Untar to {{ project_directory }}"
-  unarchive:
-    extra_opts: [-p]
-    src: "{{ temp_file.stdout }}"
-    dest: "{{ project_directory }}"
-  when: code_source == 'local'
-- name: "Delete temporary archive {{ temp_file.stdout }}"
-  file:
-    path: "{{ temp_file.stdout }}"
-    state: absent
-  delegate_to: localhost
-  when: code_source == 'local'
+
 - name: "Generate `-f` parameters"
   set_fact:
     docker_compose_switch: "{{ docker_compose_files | map('regex_replace', '(.*)', '-f \\1') | join(' ') }}"
+
 - name: "Docker-compose Pull images"
   shell:
     cmd: "docker-compose {{ docker_compose_switch }} pull"
@@ -114,7 +26,8 @@
   args:
     warn: False
   become: "{{ docker_become }}"
-  when: pull_images
+  when: pull_images | bool
+
 - name: "Docker-compose Build"
   shell:
     cmd: "docker-compose {{ docker_compose_switch }} build {{ pull_images | ternary('--pull', '') }}"
@@ -122,9 +35,10 @@
   args:
     warn: False
   become: "{{ docker_become }}"
-  when: build_images
+  when: build_images | bool
+
 - name: "Stop, build and Start Docker Compose {{ project_directory }}: {{ '; '.join(docker_compose_files) }}"
-  docker_service:
+  docker_compose:
     project_src: "{{ project_directory }}"
     project_name: "{{ project_name | default(omit) }}"
     build: False
